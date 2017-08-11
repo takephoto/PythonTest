@@ -64,10 +64,19 @@ if '__main__' == __name__:
     # 获取此路径下的所有文件
     if not os.path.isdir(project_path):
         project_path = os.path.join(project_path + os.sep + '.')
+
     project_name = ''
-    for filename in os.listdir(project_path):
-        if filename.find('xcworkspace') or filename.find('xcodeproj'):
+    dir = os.listdir(project_path)
+    print dir
+    for filename in dir:
+        print "===>" + filename
+        print project_path + os.sep + filename
+        if filename.find('xcworkspace'):
             project_name = filename
+            break
+        if filename.find('xcodeproj'):
+            project_name = filename
+            break
     if project_name == '':
         print 'No Xcode project found'
         sys.exit()
@@ -114,7 +123,19 @@ if '__main__' == __name__:
     root.write(infoPath)
     print '当前版本：%s' % (mVersion)
 
-    p = Popen(['xcrun','--help'], stdout=PIPE, stderr=PIPE, stdin=PIPE)
+    # 打包归档生成路径
+    archivePath = os.path.curdir
+    # xcodebuild - archivePath
+    # "/Users/mark/buildserver/BuildDemo.xcarchive" - workspace
+    # BuildDemo.xcworkspace - sdk
+    # iphoneos - scheme
+    # "BuildDemo" - configuration
+    # "Debug"
+    # archive
+
+    cmd = 'xcodebuild -archivePath %s -workspace %s -sdk %s -scheme %s -configuration %s archive' % (archivePath, project_path + project_name, 'iphoneos', project_name.split('.')[0] , 'Realse')
+    print cmd
+    p = Popen(cmd, stdout=PIPE, stderr=PIPE, stdin=PIPE)
     output = p.stdout.readlines()
 
     for out in output:
